@@ -35,6 +35,11 @@ pubsubnet2.create_tags(Tags=[{"Key":"Name","Value":"K8s_Pubsubnet2"}])
 pubsubnet3.create_tags(Tags=[{"Key":"Name","Value":"K8s_Pubsubnet3"}])
 intGateway.create_tags(Tags=[{"Key":"Name","Value":"K8s_IGW"}])
 pubRouteTable.create_tags(Tags=[{"Key":"Name","Value":"K8s_RT"}])
+user_data = '''#!/bin/bash
+yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm\n
+systemctl start amazon-ssm-agent
+systemctl enable amazon-ssm-agent
+'''
 instance_sec_group = ec2.create_security_group(
     GroupName='k8s_Master_Group', Description='k8s_Master security group', VpcId=vpc.id)
 ec2Client.authorize_security_group_ingress(
@@ -133,6 +138,7 @@ for i in sec_group['SecurityGroups']:
                    'Groups': [instance_sec_group.group_id]
                 }
             ],
+            UserData=user_data,
             TagSpecifications=[
                 {
                     'ResourceType': 'instance',
